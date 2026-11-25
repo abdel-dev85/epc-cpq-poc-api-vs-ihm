@@ -5,46 +5,49 @@
  *
  * Volontairement sans dependance a jsforce ou equivalent : la surface dont
  * cette demo a besoin (describe, query, get) tient en quelques appels GET.
- * Le proxy EDF est pose via undici (fetch global de Node ne lit pas
- * HTTP_PROXY/HTTPS_PROXY tout seul).
+ *
+ * Le proxy EDF est pose via un dispatcher undici explicite (`request()` avec
+ * `dispatcher`), pas via `setGlobalDispatcher` + `fetch` global : constate en
+ * pratique, le `fetch` natif de Node n'utilise pas le dispatcher pose par le
+ * paquet `undici` installe (deux instances d'undici distinctes, l'une interne
+ * a Node, l'autre le paquet npm) et tente une connexion directe, bloquee par
+ * le reseau EDF en dehors du proxy.
  */
+
+const { request, ProxyAgent, Agent } = require('undici');
 
 const { config } = require('./config');
 const { getSession } = require('./sf-cli');
 
-let dispatcherReady = false;
-
-function ensureProxyDispatcher() {
-  if (dispatcherReady || !config.proxyUrl) return;
-  const { ProxyAgent, setGlobalDispatcher } = require('undici');
-  setGlobalDispatcher(new ProxyAgent(config.proxyUrl));
-  dispatcherReady = true;
-}
+const dispatcher = config.proxyUrl ? new ProxyAgent(config.proxyUrl) : new Agent();
 
 /** GET authentifie sur l'API REST, avec un seul retry si le jeton cache a expire. */
 async function restGet(relativePath, { forceRefresh = false } = {}) {
-  ensureProxyDispatcher();
   const session = getSession({ forceRefresh });
   const url = relativePath.startsWith('http')
     ? relativePath
     : `${session.instanceUrl}${relativePath}`;
 
-  const response = await fetch(url, {
+  const { statusCode, body: responseBody } = await request(url, {
+    dispatcher,
     headers: { Authorization: `Bearer ${session.accessToken}` },
-    signal: AbortSignal.timeout(config.httpTimeoutMs),
+    headersTimeout: config.httpTimeoutMs,
+    bodyTimeout: config.httpTimeoutMs,
   });
 
-  if (response.status === 401 && !forceRefresh) {
+  if (statusCode === 401 && !forceRefresh) {
+    await responseBody.text().catch(() => {});
     return restGet(relativePath, { forceRefresh: true });
   }
 
-  const body = await response.json().catch(() => null);
+  const raw = await responseBody.text();
+  const body = raw ? JSON.parse(raw) : null;
 
-  if (!response.ok) {
+  if (statusCode < 200 || statusCode >= 300) {
     const detail = Array.isArray(body) && body[0]
       ? `${body[0].errorCode}: ${body[0].message}`
       : JSON.stringify(body);
-    throw new Error(`GET ${url} a echoue (HTTP ${response.status}) : ${detail}`);
+    throw new Error(`GET ${url} a echoue (HTTP ${statusCode}) : ${detail}`);
   }
 
   return body;

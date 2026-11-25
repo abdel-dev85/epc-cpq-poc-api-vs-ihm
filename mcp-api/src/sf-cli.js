@@ -26,6 +26,13 @@ let cachedAt = 0;
 function cliEnv() {
   const env = { ...process.env, NO_COLOR: '1', FORCE_COLOR: '0' };
 
+  // Le CLI Salesforce lit lui-meme SF_API_VERSION/SFDX_API_VERSION pour sa
+  // propre version d'API (format "68.0", sans "v") : les retirer protege
+  // d'une collision si l'environnement herite en porte une au format REST
+  // ("v68.0") utilise par ce serveur. Constate en pratique sur le trial.
+  delete env.SF_API_VERSION;
+  delete env.SFDX_API_VERSION;
+
   if (config.proxyUrl) {
     env.HTTP_PROXY = env.HTTP_PROXY || config.proxyUrl;
     env.HTTPS_PROXY = env.HTTPS_PROXY || config.proxyUrl;

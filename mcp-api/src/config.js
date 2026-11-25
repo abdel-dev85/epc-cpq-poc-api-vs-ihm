@@ -43,7 +43,11 @@ const config = {
   orgAlias: process.env.SF_ALIAS || process.env.SF_CLI_ORG || 'eu-cloud-trial',
   sfCliOrg: process.env.SF_CLI_ORG || 'eu-cloud-trial',
 
-  apiVersion: process.env.SF_API_VERSION || 'v62.0',
+  // Nom distinct de SF_API_VERSION : cette derniere est lue par le CLI
+  // Salesforce lui-meme (sf org display) pour sa propre version d'API, dans
+  // un format sans "v" ("68.0"). La confondre fait echouer le CLI avec
+  // "v68.0 is not a valid API version." - constate en pratique sur le trial.
+  apiVersion: process.env.EPC_API_VERSION || 'v62.0',
 
   sfCliBin: process.env.SF_CLI_BIN || 'sf',
   sfCliDir: process.env.SF_CLI_DIR || '',

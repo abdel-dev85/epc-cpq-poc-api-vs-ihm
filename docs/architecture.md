@@ -65,7 +65,7 @@ eprouvees sur un org reel par le depot voisin. Un page object specifique a un
 ecran Vlocity Product Designer attend une capture sur le trial — voir Regle 3
 du `CLAUDE.md` de ce depot.
 
-## `skills/`
+## `.claude/skills/`
 
 Deux skills, meme forme de sortie, methode differente :
 

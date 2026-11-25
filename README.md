@@ -25,7 +25,7 @@ perimetre differents — ne pas copier de code entre les deux, voir
 epc-cpq-poc-api-vs-ihm/
 ├── mcp-api/        <- serveur MCP : REST/Tooling API + SOQL, lecture seule
 ├── mcp-ihm/        <- serveur MCP : Playwright sur Lightning, lecture seule
-├── skills/
+├── .claude/skills/
 │   ├── product-discovery-api/
 │   └── product-discovery-ihm/
 ├── reports/        <- gabarit versionne ; les rapports generes ne le sont pas

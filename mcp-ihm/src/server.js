@@ -120,23 +120,37 @@ server.registerTool(
 server.registerTool(
   'epc_ihm_search_record',
   {
-    title: 'Rechercher via la recherche globale Lightning',
+    title: 'Rechercher via une vue de liste Lightning',
     description:
-      "Tape un terme dans la recherche globale Lightning (comme le ferait un utilisateur), "
-      + "valide, et releve les resultats affiches. Premiere etape du parcours IHM, equivalent "
-      + 'cote navigateur de epc_api_search_product cote API.',
+      "Ouvre la vue de liste d'un objet et filtre les lignes affichees par un terme (sous-chaine, "
+      + "insensible a la casse, sur n'importe quel champ visible). Equivalent cote navigateur de "
+      + 'epc_api_search_product cote API. La recherche globale de ce trial ouvre sur une page '
+      + "d'accueil specifique (splash d'onboarding, pas la recherche Lightning standard) - voir "
+      + 'docs/decisions.md - la vue de liste est le parcours retenu, deja eprouve sur un org reel.',
     inputSchema: z.strictObject({
-      term: z.string().describe('Terme a rechercher, par exemple un nom de produit'),
+      term: z.string().describe('Terme a rechercher parmi les lignes affichees'),
+      object: z.string().optional().describe("Nom d'API de l'objet (defaut Product2)"),
+      listView: z.string().optional().describe('Nom developpeur de la vue (defaut : vue courante)'),
     }),
   },
-  guarded('epc_ihm_search_record', async ({ term }) => {
-    const { SearchPage } = require('./pages/search-page');
+  guarded('epc_ihm_search_record', async ({ term, object = 'Product2', listView }) => {
+    const { ListViewPage } = require('./pages/list-view-page');
     const result = await browser.withPage(async (page) => {
-      const search = new SearchPage(page);
-      await search.search(term);
-      return search.extractResults();
+      const view = new ListViewPage(page);
+      await view.open(object, listView);
+      return view.extractData();
     });
-    return textResult({ term, ...result });
+
+    const needle = term.toLowerCase();
+    const matches = result.rows.filter(row =>
+      Object.values(row.fields).some(v => String(v).toLowerCase().includes(needle))
+    );
+
+    return textResult({
+      term, object, url: result.url, viewName: result.viewName,
+      rowCount: result.rowCount, truncated: result.truncated, messages: result.messages,
+      matches,
+    });
   })
 );
 

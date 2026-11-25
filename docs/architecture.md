@@ -56,7 +56,7 @@ Outils (tous en lecture) :
 |---|---|
 | `epc_ihm_ping` | lance le navigateur, authentifie (frontdoor sf-cli), verifie que Lightning charge |
 | `epc_ihm_screenshot` | capture pleine page |
-| `epc_ihm_search_record` | tape dans la recherche globale Lightning, releve les resultats proposes |
+| `epc_ihm_search_record` | ouvre la vue de liste d'un objet et filtre les lignes affichees par un terme |
 | `epc_ihm_read_record` | ouvre une fiche (Id ou chemin) et releve ce qu'elle **affiche** : panneau d'en-tete, listes associees visibles, messages/bandeaux |
 
 `epc_ihm_read_record` s'appuie sur des primitives generiques Lightning
@@ -64,6 +64,23 @@ Outils (tous en lecture) :
 eprouvees sur un org reel par le depot voisin. Un page object specifique a un
 ecran Vlocity Product Designer attend une capture sur le trial — voir Regle 3
 du `CLAUDE.md` de ce depot.
+
+### Constate sur le trial
+
+- **La recherche globale de ce trial n'est pas la recherche Lightning
+  standard.** La home ouvre sur une page d'accueil propre au trial
+  (`id="global-search-01"`, classes `splashPage-*` : un widget d'onboarding du
+  parcours "feature discoverability", pas `.slds-global-header`).
+  `epc_ihm_search_record` s'appuie donc sur la vue de liste (`ListViewPage`,
+  deja eprouvee sur canopee-edf par le depot voisin) plutot que sur un
+  selecteur devine pour cet ecran specifique au trial.
+- **La fiche produit s'ouvre dans l'app "Vlocity Product Designer"**, avec des
+  onglets DETAILS / PRICING / STRUCTURE / ATTACHMENTS / ATTRIBUTE RULES /
+  CONTEXT RULES / FULFILLMENT — une structure que `epc_ihm_read_record` rend
+  aujourd'hui en texte visible brut (aucun patron `data-label` sur cet
+  ecran) : c'est une information que l'IHM donne et que l'API ne rend pas sous
+  cette forme (la notion d'onglet n'existe pas cote donnees), a mentionner
+  dans le rapport comparatif plutot qu'a ignorer.
 
 ## `.claude/skills/`
 

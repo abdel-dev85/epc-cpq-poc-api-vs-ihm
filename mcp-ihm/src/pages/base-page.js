@@ -24,6 +24,10 @@ const SHADOW_HELPERS = `
     }
     return out;
   }
+  function deepQueryFirst(root, selector) {
+    const all = deepQueryAll(root, selector);
+    return all.length ? all[0] : null;
+  }
   function clean(s) { return (s || '').replace(/\\s+/g, ' ').trim(); }
 `;
 

@@ -25,12 +25,17 @@ Un nom de produit, passe en argument. S'il manque, le demander.
    (consentement, MFA, splash de release) — et le message nomme la commande
    de remediation si c'est un probleme d'authentification.
 2. Chronometrer a partir d'ici.
-3. Appeler `epc_ihm_search_record` avec le nom du produit.
-   - Si `rows` contient des resultats exploitables, identifier la ligne qui
-     correspond au produit et son `recordId` ou son lien.
-   - Si seul `visibleText` est rendu (pas de patron `data-label` sur cet
-     ecran de resultats), lire ce texte pour y trouver la correspondance —
-     ne pas deviner un Id qui n'apparait pas explicitement.
+3. Appeler `epc_ihm_search_record` avec le nom du produit (parametre `term`;
+   `object` par defaut `Product2`). L'outil ouvre la vue de liste de l'objet
+   et filtre les lignes affichees — c'est la recherche globale habituelle de
+   Lightning qui est hors perimetre ici : sur ce trial, elle ouvre une page
+   d'accueil specifique a l'onboarding, pas un ecran de resultats standard
+   (voir "Constate sur le trial" dans `docs/architecture.md`).
+   - Si `matches` contient des resultats, identifier la ligne qui correspond
+     au produit et son `recordId`.
+   - Si `matches` est vide alors que `rowCount` ne l'est pas, le produit n'est
+     probablement pas dans la vue courante (`Recently Viewed` par defaut) :
+     retenter avec un `listView` different plutot que de deviner un Id.
 4. Appeler `epc_ihm_read_record` avec l'Id ou le chemin trouve.
 5. Si le resultat ne porte que `visibleText` (pas de `dataLabelRows`), le lire
    tel quel : c'est le filet de secours honnete de ce serveur pour un ecran

@@ -26,7 +26,7 @@ status: active
 ## Decouverte IHM
 
 - **Duree :** … s
-- **Parcours suivi :** recherche globale -> fiche -> onglets ouverts
+- **Parcours suivi :** vue de liste -> fiche -> onglets ouverts
 - **Ce qui a ete lu :** …
 - **Ce que l'IHM montre que l'API n'a pas rendu :** … (messages de validation,
   options grisees, mise en page — ou "rien" si c'est le cas)

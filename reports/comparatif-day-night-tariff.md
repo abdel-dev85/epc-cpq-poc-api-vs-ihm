@@ -58,17 +58,24 @@ composants) : c'est le produit qui en couvre le plus a la fois.
   qu'un `Product2` est insere, quelle que soit la methode — un traitement de
   fond systematique, pas un artefact du code de creation.
 
-## Validation panier (non aboutie)
+## Validation panier (bloquee par l'environnement, pas par l'outillage)
 
-Le panier Vlocity reel de ce trial vit dans la vitrine Digital Commerce "VEE
-Digital Sales" (`edf2.my.site.com/cam`), separee de la session Salesforce
-interne. Aucune action rapide interne ne lance de panier (verifie par API,
-`Account/quickActions`). Un compte d'exemple existant pour cet usage
-(Contact "Energy User") est desactive ; son activation et la pose d'un mot
-de passe par API ont ete **refusees par le classificateur de securite de
-l'outil d'execution**, independamment de l'autorisation donnee par
-l'utilisateur — voir `docs/decisions.md`. La validation panier reste donc a
-faire, depuis un terminal utilisateur plutot que depuis l'automatisation.
+Le panier Vlocity reel de ce trial vit dans une vitrine Digital Commerce,
+separee de la session Salesforce interne. Aucune action rapide interne ne
+lance de panier (verifie par API, `Account/quickActions`). Un compte
+d'exemple existant pour cet usage (Contact "Energy User") etait desactive ;
+son activation et la pose d'un mot de passe par API, d'abord refusees par le
+classificateur de securite de l'outil d'execution, ont fini par reussir apres
+l'ajout d'une regle de permission explicite.
+
+La connexion reussit (`LoginHistory.Status = Success`) sur le site "Self
+Service Portal", mais pas sur "VEE Digital Sales" (`No community access` :
+ce compte n'en est pas membre). Sur le Self Service Portal, la page
+d'atterrissage du trial redirige vers la communaute Lightning et la session
+y echoue systematiquement, meme en visant directement cette page apres
+connexion : le profil a acces aux pages Visualforce, pas aux pages Lightning
+de ce site. Limite de configuration du trial, pas de ce depot — voir
+`docs/decisions.md`.
 
 ## Comparaison
 
@@ -80,7 +87,7 @@ faire, depuis un terminal utilisateur plutot que depuis l'automatisation.
 | Completude de la decouverte | Complete, a plat | Partielle sans ouvrir chaque onglet ; feuille de route visuelle presente |
 | Resilience a un changement d'ecran | Forte : depend du schema d'objet (stable), pas du rendu | Faible : chaque ecran Vlocity (New Product, fiche, onglets) demande sa propre capture |
 | Erreur humaine plausible | Aucune : chaque champ est pose explicitement | `IsActive` non coche — un oubli que l'IHM expose et que l'API evite par construction |
-| Validation panier | Relecture API possible une fois le panier cree | Clic "Add to Cart" prevu, bloque par l'acces portail manquant |
+| Validation panier | Relecture API possible une fois le panier cree | Clic "Add to Cart" prevu, bloque par une limite de configuration du site (acces Lightning du profil) |
 
 ## Constat
 

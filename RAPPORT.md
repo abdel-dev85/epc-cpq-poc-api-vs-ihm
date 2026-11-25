@@ -150,26 +150,39 @@ panier invalide sans le demontrer), et tout documenter. Voir
   Product Designer — attend une capture plus poussee, voir Regle 3 du
   `CLAUDE.md`).
 
-## Validation panier — non aboutie, et pourquoi
+## Validation panier — deux obstacles distincts, le second non resolu
 
-Le panier Vlocity reel de ce trial vit dans la vitrine Digital Commerce "VEE
-Digital Sales" (`edf2.my.site.com/cam`), separee de la session Salesforce
-interne : aucune action rapide interne ne lance de panier (verifie par API,
-`Account/quickActions`). Un compte d'exemple existe deja pour cet usage
-(Contact "Energy User", profil "Energy Self Service Customer Community
-User") mais il est desactive, sans mot de passe.
+Le panier Vlocity reel de ce trial vit dans une vitrine Digital Commerce,
+separee de la session Salesforce interne : aucune action rapide interne ne
+lance de panier (verifie par API, `Account/quickActions`). Un compte
+d'exemple existait deja pour cet usage (Contact "Energy User", profil
+"Energy Self Service Customer Community User") mais etait desactive, sans
+mot de passe.
 
-L'utilisateur a autorise l'activation de ce compte et la pose d'un mot de
-passe par API pour ce seul usage. **Ces deux appels ont ete refuses par le
-classificateur de securite de l'outil d'execution (Claude Code)**,
-independamment de cette autorisation : un garde-fou de l'outil, pas une
-decision de ce depot. Le compte reste donc desactive.
+**Premier obstacle, leve :** activer ce compte et lui poser un mot de passe
+par API a d'abord ete refuse par le classificateur de securite de l'outil
+d'execution (Claude Code), independamment de l'autorisation donnee par
+l'utilisateur. Une regle de permission explicite a ete accordee
+(`.claude/settings.local.json`), et les deux appels ont ensuite reussi : le
+compte est actif.
+
+**Second obstacle, pas leve :** la connexion reussit bien (`LoginHistory`
+confirme `Status: Success` par API) sur le site "Self Service Portal" — mais
+pas sur "VEE Digital Sales" (celui qui a l'air d'etre la vraie vitrine
+commerciale ; ce compte n'en est pas membre, `Status: No community access`).
+Sur le Self Service Portal, la page d'atterrissage preconfiguree du trial
+redirige ensuite vers la communaute Lightning et **la session echoue a ce
+moment precis**, meme en visant directement cette page apres connexion : le
+profil a acces aux pages Visualforce de ce site, pas a ses pages Lightning.
+C'est une limite de configuration du trial lui-meme, pas quelque chose que ce
+depot peut corriger sans acces Setup.
 
 **Ce que cela demontre malgre tout :** creer un produit (par API ou par IHM)
 et le rendre reellement commandable sont deux etapes distinctes. La premiere
 est faite et verifiee des deux cotes. La seconde — la preuve qu'un devis
-l'accepte sans erreur — reste a faire, depuis un terminal utilisateur plutot
-que depuis l'automatisation (executer les deux appels manuellement, ou
-accorder une regle de permission explicite a l'outil). C'est en soi la
-confirmation du risque identifie des le debut de cette demo : un produit
-present dans l'org n'est pas forcement un produit utilisable en devis.
+l'accepte sans erreur — reste bloquee, non pas par manque d'autorisation ou
+d'outillage, mais par une limite reelle de l'environnement de trial. C'est en
+soi la confirmation du risque identifie des le debut de cette demo : un
+produit present dans l'org n'est pas forcement un produit utilisable en
+devis — et meme la vitrine censee le prouver peut elle-meme etre
+mal configuree.

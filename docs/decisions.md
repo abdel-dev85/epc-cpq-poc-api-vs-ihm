@@ -80,14 +80,30 @@ desactive (Contact "Energy User", `User` de profil "Energy Self Service
 Customer Community User") et la pose d'un mot de passe par API, pour ce seul
 usage de connexion a la vitrine.
 
-**Non realise :** l'appel `PATCH /sobjects/User/{id}` (activation) et
-`POST /sobjects/User/{id}/password` ont ete **refuses par le classificateur
-de securite de l'outil d'execution** (Claude Code), independamment de
-l'autorisation donnee dans la conversation — un garde-fou outil, pas une
-decision de ce depot. Le compte "Energy User" reste donc desactive, sans mot
-de passe pose. Reste a faire si cette validation est reprise : executer ces
-deux appels depuis un terminal utilisateur (hors de l'automatisation), ou
-accorder une regle de permission explicite.
+**Mise a jour :** l'appel `PATCH /sobjects/User/{id}` (activation) et
+`POST /sobjects/User/{id}/password` ont d'abord ete refuses par le
+classificateur de securite de l'outil d'execution (Claude Code),
+independamment de l'autorisation donnee dans la conversation. L'utilisateur a
+ensuite accorde une regle de permission explicite
+(`.claude/settings.local.json` du depot `mcp-epc-cpq-agentic`, projet depuis
+lequel la session tourne) ; les deux appels sont repartis et ont **reussi** :
+le compte "Energy User" est actif, avec un mot de passe pose.
+
+**Nouvelle limite constatee, environnementale cette fois :** la connexion
+elle-meme reussit (`LoginHistory.Status = Success`, confirme par API) sur
+`edf2.my.site.com/service/login` — mais pas sur `/cam/login` ("No community
+access" : ce compte n'est pas membre de VEE Digital Sales, seulement du
+Self Service Portal). Apres connexion au Self Service Portal, la page
+d'atterrissage preconfiguree du trial (`SfiEnergyCommunitiesLandingPage`,
+une page Visualforce) redirige vers la communaute Lightning
+(`/service/s/overview`) et la session echoue a ce moment precis — meme en
+visant cette URL directement apres authentification. Le profil a donc acces
+aux pages Visualforce de ce site mais pas aux pages Lightning (`/s/...`) :
+une limite de configuration propre a ce trial, pas une erreur de ce depot.
+La validation panier reste bloquee a ce point ; la suite demanderait soit un
+acces Setup pour corriger la configuration du site/profil (hors perimetre de
+cette demo), soit un autre compte membre d'un reseau dont le profil a bien
+acces aux pages Lightning.
 
 **Trace :** chaque creation est documentee dans `reports/` (ce qui a ete
 cree, par quel moyen, en combien de temps, et le resultat de la relecture),

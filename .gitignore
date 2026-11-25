@@ -1,0 +1,22 @@
+# Dependances (deux projets npm independants)
+mcp-api/node_modules/
+mcp-ihm/node_modules/
+
+# Artefacts d'execution
+mcp-ihm/.auth/
+mcp-ihm/screenshots/
+mcp-api/debug.log
+mcp-ihm/debug.log
+*.log
+
+# Configuration locale : peut pointer un org, ne se versionne pas
+.env
+
+# Sessions Salesforce : contiennent des jetons/cookies vivants
+*session*.json
+
+# Rapports generes a l'execution : le gabarit versionne, pas les sorties datees
+reports/*.md
+reports/*.json
+!reports/.gitkeep
+!reports/gabarit-rapport.md

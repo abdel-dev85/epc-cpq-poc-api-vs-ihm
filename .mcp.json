@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "epc-api": {
+      "command": "node",
+      "args": ["mcp-api/src/server.js"],
+      "env": {}
+    },
+    "epc-ihm": {
+      "command": "node",
+      "args": ["mcp-ihm/src/server.js"],
+      "env": {}
+    }
+  }
+}

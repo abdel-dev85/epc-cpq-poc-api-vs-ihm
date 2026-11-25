@@ -17,18 +17,24 @@ conception (org cible, authentification, perimetre lecture/mutation). Une
 decision qui y est ecrite ne se rediscute pas sans la faire evoluer
 explicitement dans ce fichier.
 
-## Regle 1 — Lecture seule, strictement
+## Regle 1 — Mutation cadree, pas de lecture seule par defaut
 
-Ce depot **ne mute rien** dans l'org : pas de creation, pas de modification,
-pas de suppression de produit, d'attribut, de prix ou de categorie. La
-decision est dans `docs/decisions.md` (question mutation) : tant qu'elle n'est
-pas changee la, aucun outil MCP n'ecrit dans Salesforce.
+La decision initiale ("lecture seule, strictement") a ete revisee le
+2026-11-25 : la mutation est autorisee, mais **strictement au perimetre ecrit
+dans `docs/decisions.md`** (section "Lecture seule ou mutation") — un produit
+candidat, ses deux variantes `_POC_API`/`_POC_IHM`, et le panier qui les
+valide. Rien en dehors de ce perimetre ne se cree, ne se modifie, ni ne se
+supprime. Toute extension du perimetre se fait en modifiant `docs/decisions.md`
+d'abord, pas en l'ecrivant au fil du code.
 
-Consequence directe sur la demo : on ne "cree pas un produit", on **decouvre
-et documente** un produit existant (blueprint JSON + rapport Markdown), comme
-si on preparait sa recreation. La creation elle-meme resterait un chantier
-separe, avec sa propre decision explicite (liste d'operations autorisees,
-simulation par defaut, relecture d'etat apres chaque appel).
+Deux invariants valent pour toute mutation, independamment du perimetre
+autorise :
+
+1. **Un retour d'appel n'est pas une conclusion.** Apres toute ecriture
+   (creation, ajout au panier), on relit l'etat par API pour constater —
+   jamais se fier a un message de succes seul.
+2. **Chaque mutation se documente** dans `reports/` : ce qui a ete cree, par
+   quel moyen, en combien de temps, et le resultat de la relecture.
 
 ## Regle 2 — IHM ou API : l'arbitrage se fait avant d'ecrire du code
 

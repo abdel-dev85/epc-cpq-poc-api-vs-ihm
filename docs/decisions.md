@@ -44,6 +44,46 @@ d'authentification, dans les deux serveurs.
 
 ## Lecture seule ou mutation
 
+**Mutation autorisee, perimetre trial uniquement.** Revision de la decision
+initiale (ci-dessous, gardee pour memoire) : une fois la decouverte (lecture
+seule) faite et un produit candidat complet identifie (`Day/Night Tariff`),
+l'utilisateur a explicitement autorise la creation reelle — "tu as le
+controle total ... on est dans un trial, pas de souci tu peux tout faire,
+mais documente tout" (confirme le 2026-11-25).
+
+**Perimetre autorise :**
+
+- Creer une variante du produit candidat par **API** (Product2 +
+  rattachements `vlocity_cmt__*` : attributs, tarification, categorie,
+  composants de bundle), suffixee `_POC_API`.
+- Creer la meme offre par **IHM** (pilotage Playwright, clics reels dans
+  Lightning / Vlocity Product Designer), suffixee `_POC_IHM`.
+- Ajouter le produit resultant a un panier Vlocity, par un clic "Add to
+  Cart" dans l'IHM (pas d'insertion directe de `vlocity_cmt__Cart__c` /
+  `vlocity_cmt__CartItem__c` par API : Vlocity recalcule prix et regles via
+  ses propres services, une insertion brute produirait un panier invalide
+  sans le demontrer).
+- Relire l'etat obtenu par API apres chaque etape pour constater — jamais se
+  fier a un message de succes seul : c'est la convention EDF de ce depot.
+
+**Hors perimetre, meme avec ce controle total :** rien en dehors de ce
+produit et de ce panier. Pas de suppression, pas de modification d'un
+produit ou d'un panier existant autre que ceux crees par cette demo.
+
+**Trace :** chaque creation est documentee dans `reports/` (ce qui a ete
+cree, par quel moyen, en combien de temps, et le resultat de la relecture),
+et `RAPPORT.md` tient le fil de ce qui a ete fait.
+
+**Raison du changement :** l'org est un trial jetable (30 jours, donnees
+d'exemple, aucune donnee client reelle) — le risque d'une mutation y est nul
+au-dela de "salir" un catalogue de demo. Le constat de Copilot qui a motive
+la prudence initiale reste vrai (une mutation mal sequencee laisse un produit
+present mais inutilisable en devis) : c'est precisement ce que la validation
+panier doit demontrer ou infirmer, pas une raison de ne pas creer.
+
+<details>
+<summary>Decision initiale (remplacee, gardee pour memoire)</summary>
+
 **Lecture seule.** Aucun outil MCP de ce depot ne cree, modifie ou supprime
 quoi que ce soit dans l'org. La demo "cree un produit de A a Z" demandee au
 depart est reduite a : **decouvrir et documenter** un produit existant du
@@ -58,10 +98,7 @@ sequence d'ecriture, une liste d'operations autorisees et une verification
 d'etat par relecture — un chantier a part entiere, pas un prealable a une
 demo de comparaison API/IHM.
 
-**Consequence :** si la creation effective entre un jour au perimetre, elle
-reprend ce document avec une nouvelle section : liste d'operations autorisees,
-mode simulation par defaut, et une trace de chaque appel. D'ici la, tout outil
-d'ecriture est hors de ce depot.
+</details>
 
 ## Perimetre des donnees exposees
 

@@ -1,13 +1,19 @@
 'use strict';
 
 /**
- * Assemblage d'un blueprint de produit par sondage defensif de l'objet model
- * "Industries CPQ / Product Catalog Management" standard (Product2,
- * ProductCategory, AttributeDefinition, ProductSellingModel, PricebookEntry,
- * ProductRelatedComponent - voir docs/transposition-epc-cpq.md du depot
- * voisin). La variante installee sur le trial n'est pas connue a l'avance :
- * chaque objet candidat est d'abord decrit, et ignore proprement s'il
- * n'existe pas sur cet org, plutot que de faire echouer tout l'outil.
+ * Assemblage d'un blueprint de produit par sondage defensif de deux object
+ * models possibles :
+ *   - l'objet model "Industries CPQ / Product Catalog Management" standard
+ *     (ProductCategoryProduct, ProductAttributeDefinition, PricebookEntry,
+ *     ProductRelatedComponent) ;
+ *   - l'objet model **Vlocity CMT** (`vlocity_cmt__*`), constate en pratique
+ *     sur ce trial : les objets standard existent mais sont vides pour tous
+ *     les produits (sonde), alors que `vlocity_cmt__AttributeAssignment__c`,
+ *     `vlocity_cmt__PriceListEntry__c`, `vlocity_cmt__CatalogProductRelationship__c`
+ *     et `vlocity_cmt__ProductChildItem__c` portent les donnees reelles.
+ * La variante installee sur un org donne n'est pas connue a l'avance : chaque
+ * objet candidat est d'abord decrit, et ignore proprement s'il n'existe pas,
+ * plutot que de faire echouer tout l'outil.
  */
 
 const { describeSObject, query } = require('./sf-rest-client');
@@ -56,6 +62,37 @@ const RELATED_PROBES = [
     object: 'ProductRelatedComponent',
     whereField: 'ParentProductId',
     fields: ['ChildProductId', 'ChildProduct.Name', 'ProductComponentGroupId', 'MinQuantity', 'MaxQuantity'],
+  },
+
+  // --- Vlocity CMT (vlocity_cmt__*) - constate sur ce trial, voir l'en-tete. ---
+  {
+    section: 'categoriesVlocityCmt',
+    object: 'vlocity_cmt__CatalogProductRelationship__c',
+    whereField: 'vlocity_cmt__Product2Id__c',
+    fields: ['vlocity_cmt__CatalogId__c', 'vlocity_cmt__CatalogId__r.Name'],
+  },
+  {
+    section: 'attributsVlocityCmt',
+    object: 'vlocity_cmt__AttributeAssignment__c',
+    whereField: 'vlocity_cmt__ObjectId__c',
+    fields: [
+      'Id', 'Name',
+      'vlocity_cmt__AttributeId__r.Name', 'vlocity_cmt__AttributeId__r.vlocity_cmt__Code__c',
+      'vlocity_cmt__AttributeId__r.vlocity_cmt__ValueType__c', 'vlocity_cmt__AttributeId__r.vlocity_cmt__Value__c',
+      'vlocity_cmt__AttributeCategoryId__r.Name',
+    ],
+  },
+  {
+    section: 'tarificationVlocityCmt',
+    object: 'vlocity_cmt__PriceListEntry__c',
+    whereField: 'vlocity_cmt__ProductId__c',
+    fields: ['Name', 'vlocity_cmt__PriceListId__r.Name', 'vlocity_cmt__IsBasePrice__c'],
+  },
+  {
+    section: 'composantsVlocityCmt',
+    object: 'vlocity_cmt__ProductChildItem__c',
+    whereField: 'vlocity_cmt__ParentProductId__c',
+    fields: ['vlocity_cmt__ChildProductId__c', 'vlocity_cmt__ChildProductId__r.Name'],
   },
 ];
 

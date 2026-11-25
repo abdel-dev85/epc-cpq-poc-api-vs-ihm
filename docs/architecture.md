@@ -42,7 +42,7 @@ Outils (tous en lecture) :
 | `epc_api_ping` | verifie l'authentification (org, instance, version d'API) |
 | `epc_api_describe_object` | `describe` d'un sObject : champs, types, record types, picklists |
 | `epc_api_search_product` | SOSL/SOQL — trouve des produits par nom ou mot-cle |
-| `epc_api_get_product_blueprint` | assemble un blueprint JSON pour un produit : fiche, attributs, tarification, categories — en sondant un ensemble d'objets candidats et en ignorant ceux absents de l'org |
+| `epc_api_get_product_blueprint` | assemble un blueprint JSON pour un produit : fiche, attributs, tarification, categories, composants — en sondant a la fois l'objet model standard et l'objet model Vlocity CMT (`vlocity_cmt__*`), et en ignorant ce qui est absent de l'org |
 | `epc_api_run_soql` | SOQL libre, **SELECT uniquement** (garde-fou lecture seule applicatif) |
 
 Authentification : jeton + `instanceUrl` obtenus via `sf org display --json`
@@ -67,6 +67,15 @@ du `CLAUDE.md` de ce depot.
 
 ### Constate sur le trial
 
+- **L'objet model reellement peuple est Vlocity CMT (`vlocity_cmt__*`), pas
+  l'objet model standard.** `vlocity_cmt__AttributeAssignment__c`,
+  `vlocity_cmt__PriceListEntry__c`, `vlocity_cmt__CatalogProductRelationship__c`
+  et `vlocity_cmt__ProductChildItem__c` portent des donnees reelles sur tous
+  les produits sondes ; les objets standard (`ProductAttributeDefinition`,
+  `PricebookEntry` mis a part, `ProductRelatedComponent`...) existent mais
+  sont vides. `epc_api_get_product_blueprint` sonde desormais les deux objet
+  models en parallele (sections `*VlocityCmt`) plutot que de ne couvrir que
+  le standard.
 - **La recherche globale de ce trial n'est pas la recherche Lightning
   standard.** La home ouvre sur une page d'accueil propre au trial
   (`id="global-search-01"`, classes `splashPage-*` : un widget d'onboarding du

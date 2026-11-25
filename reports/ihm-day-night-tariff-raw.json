@@ -1,0 +1,26 @@
+{
+  "durationMs": 78461,
+  "listSearch": {
+    "rowCount": 44,
+    "truncated": false,
+    "match": {
+      "fields": {
+        "Product Name": "Day/Night Tariff",
+        "Product Code": "PD_DAY_NIGHT_TARIFF",
+        "Product Description": "Day/Night Tariff energy plan giving you a cheaper electricity rate at night.",
+        "Product Family": "Electricity"
+      },
+      "recordId": "01tWx000007jGeUIAU",
+      "href": "/lightning/r/01tWx000007jGeUIAU/view"
+    }
+  },
+  "record": {
+    "url": "https://edf2.lightning.force.com/lightning/r/Product2/01tWx000007jGeUIAU/view",
+    "title": "Day/Night Tariff | Product | Salesforce",
+    "messages": [],
+    "dataLabelRows": [],
+    "visibleText": "Skip to Navigation\nSkip to Main Content\nSearch...\nAdd favorite\nFavorites list\nGlobal Actions\nSalesforce Help\nSetup\n1\nNotifications\n1 new notifications\nView profile\nApp Launcher\nVlocity Product Designer\nProducts\nShow Navigation Menu\nPress Spacebar to reorder tabs.\nProduct2\nAmazon Smart Thermostat | Product\nActions\nClose Amazon Smart Thermostat | Product\nvlocity cmt ObjectClass c\nProduct2 Object\nActions\nClose Product2 Object\nHome\nHome\nActions\nClose Home\nProduct2\nSolar Panel Starter kit | Product\nActions\nClose Solar Panel Starter kit | Product\nProduct2\nDay/Night Tariff | Product\nActions for Day/Night Tariff | Product\nClose Day/Night Tariff | Product\nSplit view mode\nProduct\nDay/Night Tariff\nSlack\nDelete\nGenerate All References\nNew Version\nShow more actions\n\nProduct Code\n\nPD_DAY_NIGHT_TARIFF\n\nProduct Family\n\nElectricity\n\nTabs\nDETAILS\nPRICING\nSTRUCTURE\nATTACHMENTS\nATTRIBUTE RULES\nCONTEXT RULES\nFULFILLMENT",
+    "note": "Aucune ligne data-label trouvee sur cet ecran : texte visible rendu en filet de secours. Un page object specifique a cet ecran demande une capture reelle (Regle 3 du CLAUDE.md)."
+  },
+  "screenshotPath": "C:\\Users\\ab5234cl\\Documents\\epc-cpq-poc-api-vs-ihm\\reports\\screenshots\\ihm-day-night-tariff.png"
+}

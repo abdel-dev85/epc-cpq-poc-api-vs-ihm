@@ -15,8 +15,13 @@ mcp-ihm/debug.log
 # Sessions Salesforce : contiennent des jetons/cookies vivants
 *session*.json
 
-# Rapports generes a l'execution : le gabarit versionne, pas les sorties datees
+# Rapports generes a l'execution : ignores par defaut (sorties d'essais
+# ad hoc), sauf le gabarit et les rapports de simulation retenus comme
+# livrables de la demo (voir RAPPORT.md).
 reports/*.md
 reports/*.json
 !reports/.gitkeep
 !reports/gabarit-rapport.md
+!reports/*-day-night-tariff*.md
+!reports/blueprint-day-night-tariff.json
+!reports/ihm-day-night-tariff-raw.json

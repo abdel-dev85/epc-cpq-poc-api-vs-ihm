@@ -1,0 +1,235 @@
+{
+  "source": {
+    "Id": "01tWx000007jGeUIAU",
+    "Name": "Day/Night Tariff",
+    "ProductCode": "PD_DAY_NIGHT_TARIFF",
+    "Description": "Day/Night Tariff energy plan giving you a cheaper electricity rate at night.",
+    "IsActive": true,
+    "Family": "Electricity"
+  },
+  "sections": {
+    "categories": {
+      "objet": "ProductCategoryProduct",
+      "enregistrements": []
+    },
+    "attributs": {
+      "objet": "ProductAttributeDefinition",
+      "enregistrements": []
+    },
+    "modelesDeVente": {
+      "objet": "ProductSellingModelOption",
+      "enregistrements": []
+    },
+    "tarification": {
+      "objet": "PricebookEntry",
+      "enregistrements": [
+        {
+          "attributes": {
+            "type": "PricebookEntry",
+            "url": "/services/data/v68.0/sobjects/PricebookEntry/01uWx000000SNUqIAO"
+          },
+          "Pricebook2": {
+            "attributes": {
+              "type": "Pricebook2",
+              "url": "/services/data/v68.0/sobjects/Pricebook2/01sWx000001Dr4LIAS"
+            },
+            "Name": "Standard Price Book"
+          },
+          "UnitPrice": 0,
+          "IsActive": true
+        }
+      ]
+    },
+    "composants": {
+      "objet": "ProductRelatedComponent",
+      "enregistrements": []
+    },
+    "categoriesVlocityCmt": {
+      "objet": "vlocity_cmt__CatalogProductRelationship__c",
+      "enregistrements": [
+        {
+          "attributes": {
+            "type": "vlocity_cmt__CatalogProductRelationship__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__CatalogProductRelationship__c/a14Wx000003cQsYIAU"
+          },
+          "vlocity_cmt__CatalogId__c": "a16Wx000001FcdvIAC",
+          "vlocity_cmt__CatalogId__r": {
+            "attributes": {
+              "type": "vlocity_cmt__Catalog__c",
+              "url": "/services/data/v68.0/sobjects/vlocity_cmt__Catalog__c/a16Wx000001FcdvIAC"
+            },
+            "Name": "Consumer Electricity Catalog"
+          }
+        }
+      ]
+    },
+    "attributsVlocityCmt": {
+      "objet": "vlocity_cmt__AttributeAssignment__c",
+      "enregistrements": [
+        {
+          "attributes": {
+            "type": "vlocity_cmt__AttributeAssignment__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__AttributeAssignment__c/a0WWx000000dLtuMAE"
+          },
+          "Id": "a0WWx000000dLtuMAE",
+          "Name": "CLONED_01tDp000000Wl4sIAC_ATT_USAGE",
+          "vlocity_cmt__AttributeId__r": {
+            "attributes": {
+              "type": "vlocity_cmt__Attribute__c",
+              "url": "/services/data/v68.0/sobjects/vlocity_cmt__Attribute__c/a0ZWx000002YHRyMAO"
+            },
+            "Name": "Usage Attribute",
+            "vlocity_cmt__Code__c": "ATT_USAGE",
+            "vlocity_cmt__ValueType__c": "Number",
+            "vlocity_cmt__Value__c": null
+          },
+          "vlocity_cmt__AttributeCategoryId__r": {
+            "attributes": {
+              "type": "vlocity_cmt__AttributeCategory__c",
+              "url": "/services/data/v68.0/sobjects/vlocity_cmt__AttributeCategory__c/a0YWx000002k3CLMAY"
+            },
+            "Name": "Usage Pricing"
+          }
+        },
+        {
+          "attributes": {
+            "type": "vlocity_cmt__AttributeAssignment__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__AttributeAssignment__c/a0WWx000000dLtvMAE"
+          },
+          "Id": "a0WWx000000dLtvMAE",
+          "Name": "CLONED_01tDp000000Wl4sIAC_ATT_METER_TYPE",
+          "vlocity_cmt__AttributeId__r": {
+            "attributes": {
+              "type": "vlocity_cmt__Attribute__c",
+              "url": "/services/data/v68.0/sobjects/vlocity_cmt__Attribute__c/a0ZWx000002YHRzMAO"
+            },
+            "Name": "Meter Type",
+            "vlocity_cmt__Code__c": "ATT_METER_TYPE",
+            "vlocity_cmt__ValueType__c": "Picklist",
+            "vlocity_cmt__Value__c": null
+          },
+          "vlocity_cmt__AttributeCategoryId__r": {
+            "attributes": {
+              "type": "vlocity_cmt__AttributeCategory__c",
+              "url": "/services/data/v68.0/sobjects/vlocity_cmt__AttributeCategory__c/a0YWx000002k3CMMAY"
+            },
+            "Name": "Commodity Commercial Offers"
+          }
+        },
+        {
+          "attributes": {
+            "type": "vlocity_cmt__AttributeAssignment__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__AttributeAssignment__c/a0WWx000000dLtwMAE"
+          },
+          "Id": "a0WWx000000dLtwMAE",
+          "Name": "CLONED_01tDp000000Wl4sIAC_ATT_DISTRIBUTION_REGION",
+          "vlocity_cmt__AttributeId__r": {
+            "attributes": {
+              "type": "vlocity_cmt__Attribute__c",
+              "url": "/services/data/v68.0/sobjects/vlocity_cmt__Attribute__c/a0ZWx000002YHS0MAO"
+            },
+            "Name": "Distribution Region",
+            "vlocity_cmt__Code__c": "ATT_DISTRIBUTION_REGION",
+            "vlocity_cmt__ValueType__c": "Picklist",
+            "vlocity_cmt__Value__c": null
+          },
+          "vlocity_cmt__AttributeCategoryId__r": {
+            "attributes": {
+              "type": "vlocity_cmt__AttributeCategory__c",
+              "url": "/services/data/v68.0/sobjects/vlocity_cmt__AttributeCategory__c/a0YWx000002k3CNMAY"
+            },
+            "Name": "Commodity Cost Components"
+          }
+        }
+      ]
+    },
+    "tarificationVlocityCmt": {
+      "objet": "vlocity_cmt__PriceListEntry__c",
+      "enregistrements": [
+        {
+          "attributes": {
+            "type": "vlocity_cmt__PriceListEntry__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__PriceListEntry__c/a46Wx0000001fMUIAY"
+          },
+          "Name": "e1b8259c-01e8-a032-280e-e9291bd516ea",
+          "vlocity_cmt__PriceListId__r": {
+            "attributes": {
+              "type": "vlocity_cmt__PriceList__c",
+              "url": "/services/data/v68.0/sobjects/vlocity_cmt__PriceList__c/a47Wx0000001BPdIAM"
+            },
+            "Name": "Default Price List"
+          },
+          "vlocity_cmt__IsBasePrice__c": false
+        }
+      ]
+    },
+    "composantsVlocityCmt": {
+      "objet": "vlocity_cmt__ProductChildItem__c",
+      "enregistrements": [
+        {
+          "attributes": {
+            "type": "vlocity_cmt__ProductChildItem__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__ProductChildItem__c/a4HWx0000002CfPMAU"
+          },
+          "vlocity_cmt__ChildProductId__c": "01tWx000007jGeLIAU",
+          "vlocity_cmt__ChildProductId__r": {
+            "attributes": {
+              "type": "Product2",
+              "url": "/services/data/v68.0/sobjects/Product2/01tWx000007jGeLIAU"
+            },
+            "Name": "Unit Rate - Day"
+          }
+        },
+        {
+          "attributes": {
+            "type": "vlocity_cmt__ProductChildItem__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__ProductChildItem__c/a4HWx0000002CfQMAU"
+          },
+          "vlocity_cmt__ChildProductId__c": "01tWx000007jGeBIAU",
+          "vlocity_cmt__ChildProductId__r": {
+            "attributes": {
+              "type": "Product2",
+              "url": "/services/data/v68.0/sobjects/Product2/01tWx000007jGeBIAU"
+            },
+            "Name": "Standing Charges"
+          }
+        },
+        {
+          "attributes": {
+            "type": "vlocity_cmt__ProductChildItem__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__ProductChildItem__c/a4HWx0000002CfRMAU"
+          },
+          "vlocity_cmt__ChildProductId__c": null,
+          "vlocity_cmt__ChildProductId__r": null
+        },
+        {
+          "attributes": {
+            "type": "vlocity_cmt__ProductChildItem__c",
+            "url": "/services/data/v68.0/sobjects/vlocity_cmt__ProductChildItem__c/a4HWx0000002CfSMAU"
+          },
+          "vlocity_cmt__ChildProductId__c": "01tWx000007jGeOIAU",
+          "vlocity_cmt__ChildProductId__r": {
+            "attributes": {
+              "type": "Product2",
+              "url": "/services/data/v68.0/sobjects/Product2/01tWx000007jGeOIAU"
+            },
+            "Name": "Unit Rate - Night"
+          }
+        }
+      ]
+    }
+  },
+  "omis": [
+    {
+      "section": "categories",
+      "objet": "ProductCategoryProduct",
+      "raison": "champ(s) ignore(s), absents de cet org/edition : IsPrimaryCategory"
+    },
+    {
+      "section": "tarification",
+      "objet": "PricebookEntry",
+      "raison": "champ(s) ignore(s), absents de cet org/edition : CurrencyIsoCode"
+    }
+  ],
+  "durationMs": 5525
+}

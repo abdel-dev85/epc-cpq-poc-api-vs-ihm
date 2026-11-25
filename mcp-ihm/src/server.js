@@ -1,11 +1,13 @@
 'use strict';
 
 /**
- * Serveur MCP (stdio) de decouverte EPC/CPQ par pilotage de l'IHM Lightning.
+ * Serveur MCP (stdio) de decouverte et de creation EPC/CPQ par pilotage de
+ * l'IHM Lightning.
  *
- * Lecture seule, strictement : aucun outil n'ecrit dans l'org (voir
- * docs/decisions.md a la racine du depot). Rien sur stdout en dehors du
- * protocole MCP ; le journal de debug va dans un fichier, sous EPC_DEBUG=1.
+ * Mutation cadree au perimetre ecrit dans docs/decisions.md a la racine du
+ * depot (creer le produit de base d'une variante suffixee, rien d'autre).
+ * Rien sur stdout en dehors du protocole MCP ; le journal de debug va dans un
+ * fichier, sous EPC_DEBUG=1.
  */
 
 const fs = require('fs');
@@ -174,6 +176,37 @@ server.registerTool(
       await record.open(idOrPath);
       return record.extractData();
     });
+    return textResult(result);
+  })
+);
+
+server.registerTool(
+  'epc_ihm_create_product_base',
+  {
+    title: 'Creer le produit de base (mutation cadree)',
+    description:
+      'Cree un Product2 par le formulaire "New Product" de Vlocity Product Designer (clics reels : '
+      + 'Name, ProductCode, Description, puis Save). Ne cree que l\'enregistrement de base : aucun '
+      + 'attribut, prix, categorie ou composant - reproduire la structure complete par clics demande '
+      + 'un page object par onglet (ATTRIBUTE RULES, PRICING, STRUCTURE), non capture ici (Regle 3 '
+      + 'du CLAUDE.md). Perimetre autorise par docs/decisions.md : suffixer le nom, ne pas creer en '
+      + 'dehors de ce perimetre.',
+    inputSchema: z.strictObject({
+      name: z.string().describe('Nom complet du produit, suffixe inclus (ex. "Day/Night Tariff_POC_IHM")'),
+      productCode: z.string().optional(),
+      description: z.string().optional(),
+    }),
+  },
+  guarded('epc_ihm_create_product_base', async ({ name, productCode, description }) => {
+    const { NewProductPage } = require('./pages/new-product-page');
+    const start = Date.now();
+    const result = await browser.withPage(async (page) => {
+      const form = new NewProductPage(page);
+      await form.open();
+      await form.fillBase({ name, productCode, description });
+      return form.save();
+    });
+    result.durationMs = Date.now() - start;
     return textResult(result);
   })
 );

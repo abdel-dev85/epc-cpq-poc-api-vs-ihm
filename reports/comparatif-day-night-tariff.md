@@ -43,30 +43,64 @@ composants) : c'est le produit qui en couvre le plus a la fois.
 - Detail : [`reports/decouverte-ihm-day-night-tariff.md`](decouverte-ihm-day-night-tariff.md)
 - Capture : [`reports/screenshots/ihm-day-night-tariff.png`](screenshots/ihm-day-night-tariff.png)
 
+## Creation (produit complet, a partir du blueprint de decouverte)
+
+- **API :** 70,9 s, 8 ecritures, structure complete (categorie, 3 attributs,
+  2 tarifications, 3 composants) — `Day/Night Tariff_POC_API`,
+  `01tWx000007jI3BIAU`. Detail : [`reports/creation-api-day-night-tariff.md`](creation-api-day-night-tariff.md)
+- **IHM :** 7,8 s, formulaire "New Product" de Vlocity Product Designer,
+  **produit de base seulement** (aucun attribut/prix/categorie/composant,
+  et `IsActive` reste a `false` faute d'avoir coche la case) —
+  `Day/Night Tariff_POC_IHM`, `01tWx000007jI4nIAE`. Detail :
+  [`reports/creation-ihm-day-night-tariff.md`](creation-ihm-day-night-tariff.md)
+- **Constat partage aux deux methodes :** l'org cree automatiquement un
+  "Root PCI" (`vlocity_cmt__ProductChildItem__c` sans produit enfant) des
+  qu'un `Product2` est insere, quelle que soit la methode — un traitement de
+  fond systematique, pas un artefact du code de creation.
+
+## Validation panier (non aboutie)
+
+Le panier Vlocity reel de ce trial vit dans la vitrine Digital Commerce "VEE
+Digital Sales" (`edf2.my.site.com/cam`), separee de la session Salesforce
+interne. Aucune action rapide interne ne lance de panier (verifie par API,
+`Account/quickActions`). Un compte d'exemple existant pour cet usage
+(Contact "Energy User") est desactive ; son activation et la pose d'un mot
+de passe par API ont ete **refusees par le classificateur de securite de
+l'outil d'execution**, independamment de l'autorisation donnee par
+l'utilisateur — voir `docs/decisions.md`. La validation panier reste donc a
+faire, depuis un terminal utilisateur plutot que depuis l'automatisation.
+
 ## Comparaison
 
 | Critere | API | IHM |
 |---|---|---|
-| Duree | 5,5 s | 78,5 s (avec re-auth) / ~15-20 s hors ouverture des onglets de detail |
-| Completude (attributs, prix, composants, nommes et types) | Complete, a plat | Partielle sans ouvrir chaque onglet ; feuille de route visuelle presente |
-| Resilience a un changement d'ecran | Forte : depend du schema d'objet (stable), pas du rendu | Faible : la fiche n'a pas encore de page object dedie (Regle 3), le texte visible est un filet de secours qui bouge avec le rendu |
-| Donnees obtenues qu'aucune des deux methodes n'avait | Aucune : les deux methodes se recoupent sur ce qui a ete lu | — |
+| Duree decouverte | 5,5 s | 78,5 s (avec re-auth) / ~15-20 s hors ouverture des onglets de detail |
+| Duree creation (perimetre complet vs de base) | 70,9 s pour la structure complete | 7,8 s pour le produit de base seul (non comparable a perimetre egal) |
+| Completude de la creation | Categorie + 3 attributs + 2 tarifications + 3 composants | Produit de base seulement ; `IsActive` oublie |
+| Completude de la decouverte | Complete, a plat | Partielle sans ouvrir chaque onglet ; feuille de route visuelle presente |
+| Resilience a un changement d'ecran | Forte : depend du schema d'objet (stable), pas du rendu | Faible : chaque ecran Vlocity (New Product, fiche, onglets) demande sa propre capture |
+| Erreur humaine plausible | Aucune : chaque champ est pose explicitement | `IsActive` non coche — un oubli que l'IHM expose et que l'API evite par construction |
+| Validation panier | Relecture API possible une fois le panier cree | Clic "Add to Cart" prevu, bloque par l'acces portail manquant |
 
 ## Constat
 
 Sur ce produit precis, dans cet org precis, l'API est environ 14 fois plus
-rapide que l'IHM pour obtenir une image structuree et complete du produit
-(attributs types, composants nommes, tarification), et le reste sans
-degradation si l'ecran Lightning change de mise en page — seul le schema
-d'objet compte. L'IHM, en l'etat actuel de ce serveur (pas de page object
-dedie a l'app Vlocity Product Designer), rend une vue moins structuree
-(texte visible brut) mais apporte deux choses que l'API ne donne pas par
-nature : la confirmation visuelle qu'aucune alerte n'est affichee, et
-l'organisation en onglets qui refleterait la saisie a reproduire si l'objectif
-etait de recreer ce produit a l'ecran plutot que par API.
+rapide que l'IHM pour la **decouverte**, et permet de creer une structure
+complete en une seule commande contre un parcours de formulaires repetes par
+IHM pour obtenir le meme resultat. L'IHM, elle, expose deux choses que l'API
+ne donne pas par nature : la confirmation visuelle qu'aucune alerte n'est
+affichee, et une erreur humaine reelle (`IsActive` oublie) qu'un appel API
+avec des valeurs explicites par champ ne commet pas.
 
-Le constat de fond de cette demo : **l'objet model reel de ce trial est
-Vlocity CMT** (`vlocity_cmt__*`), pas l'objet model standard Salesforce
-Industries CPQ suppose au depart — une decouverte qui n'aurait pas ete faite
-sans sonder l'org reel (voir `docs/architecture.md`, section "Constate sur le
-trial").
+Le constat de fond de cette demo tient en deux points, tous deux obtenus en
+sondant l'org reel plutot qu'en supposant son comportement :
+
+1. **L'objet model reel de ce trial est Vlocity CMT** (`vlocity_cmt__*`), pas
+   l'objet model standard Salesforce Industries CPQ suppose au depart (voir
+   `docs/architecture.md`).
+2. **Creer un produit declenche des traitements de fond** (le Root PCI
+   automatique, constate deux fois, independamment de la methode) — et le
+   rendre reellement commandable (panier valide) est une etape distincte,
+   non encore franchie ici, qui depasse la creation de l'enregistrement.
+   C'est exactement l'avertissement qui a motive la prudence initiale de ce
+   depot : un produit present n'est pas forcement un produit utilisable.

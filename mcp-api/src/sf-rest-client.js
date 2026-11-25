@@ -53,6 +53,50 @@ async function restGet(relativePath, { forceRefresh = false } = {}) {
   return body;
 }
 
+/**
+ * POST/PATCH authentifie, meme logique de retry/erreur que `restGet`.
+ * Reserve aux outils de mutation explicitement autorises (docs/decisions.md).
+ */
+async function restWrite(method, relativePath, jsonBody, { forceRefresh = false } = {}) {
+  const session = getSession({ forceRefresh });
+  const url = `${session.instanceUrl}${relativePath}`;
+
+  const { statusCode, body: responseBody } = await request(url, {
+    method,
+    dispatcher,
+    headers: {
+      Authorization: `Bearer ${session.accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(jsonBody),
+    headersTimeout: config.httpTimeoutMs,
+    bodyTimeout: config.httpTimeoutMs,
+  });
+
+  if (statusCode === 401 && !forceRefresh) {
+    await responseBody.text().catch(() => {});
+    return restWrite(method, relativePath, jsonBody, { forceRefresh: true });
+  }
+
+  const raw = await responseBody.text();
+  const body = raw ? JSON.parse(raw) : null;
+
+  if (statusCode < 200 || statusCode >= 300) {
+    const detail = Array.isArray(body) && body[0]
+      ? `${body[0].errorCode}: ${body[0].message}`
+      : JSON.stringify(body);
+    throw new Error(`${method} ${url} a echoue (HTTP ${statusCode}) : ${detail}`);
+  }
+
+  return body;
+}
+
+/** Cree un enregistrement. Rend { id, created: true } ou leve avec le detail Salesforce. */
+async function sobjectCreate(objectName, fields) {
+  const result = await restWrite('POST', `/services/data/${config.apiVersion}/sobjects/${objectName}`, fields);
+  return { id: result.id, created: Boolean(result.success) };
+}
+
 /** Describe d'un sObject. Rend null (sans lever) si l'objet n'existe pas sur cet org. */
 async function describeSObject(apiName) {
   try {
@@ -85,4 +129,4 @@ async function query(soql, { maxRecords = 500 } = {}) {
   };
 }
 
-module.exports = { restGet, describeSObject, query };
+module.exports = { restGet, restWrite, sobjectCreate, describeSObject, query };

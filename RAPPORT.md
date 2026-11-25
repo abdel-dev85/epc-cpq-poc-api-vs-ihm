@@ -109,31 +109,67 @@ Vlocity CMT**, pas l'objet model standard suppose au depart — le trial a 1040
 objets `vlocity_cmt__*` installes. Le blueprint sonde desormais les deux en
 parallele.
 
+## Autorisation de mutation (2026-11-25)
+
+Apres la decouverte, l'utilisateur a explicitement autorise le controle total
+sur ce trial ("on est dans un trial, pas de souci tu peux tout faire, mais
+documente tout"), avec deux precisions : ajouter au panier par un clic IHM
+reel (pas d'insertion directe des objets de panier par API — ca produirait un
+panier invalide sans le demontrer), et tout documenter. Voir
+`docs/decisions.md` pour le perimetre exact et ses extensions successives.
+
 ## Statut courant
 
 - Les deux serveurs MCP sont connectes et valides contre le trial
-  (`npm run ping` rend `status: connected` dans les deux).
+  (`npm run ping` rend `status: connected` dans les deux), et exposent
+  desormais chacun un outil de creation cadree :
+  `epc_api_create_product_variant` et `epc_ihm_create_product_base`.
 - **Produit retenu pour la demo : "Day/Night Tariff"**, choisi par classement
   automatique du catalogue sur la richesse de donnees reellement peuplee —
   c'est le produit qui couvre le plus de dimensions a la fois (categorie, 3
   attributs types, tarification, bundle de 3 composants).
-- **Simulation executee de bout en bout sur ce produit :**
-  - decouverte API : 5,5 s ([`reports/decouverte-api-day-night-tariff.md`](reports/decouverte-api-day-night-tariff.md))
-  - decouverte IHM : 78,5 s, re-authentification incluse ([`reports/decouverte-ihm-day-night-tariff.md`](reports/decouverte-ihm-day-night-tariff.md))
-  - comparatif : [`reports/comparatif-day-night-tariff.md`](reports/comparatif-day-night-tariff.md)
+- **Decouverte executee de bout en bout :**
+  API 5,5 s ([`reports/decouverte-api-day-night-tariff.md`](reports/decouverte-api-day-night-tariff.md)),
+  IHM 78,5 s avec re-authentification ([`reports/decouverte-ihm-day-night-tariff.md`](reports/decouverte-ihm-day-night-tariff.md)).
+- **Creation executee de bout en bout sur les deux voies :**
+  - API : `Day/Night Tariff_POC_API` (`01tWx000007jI3BIAU`), 70,9 s,
+    structure complete (categorie, 3 attributs, 2 tarifications, 3
+    composants), relue et verifiee. Detail :
+    [`reports/creation-api-day-night-tariff.md`](reports/creation-api-day-night-tariff.md).
+  - IHM : `Day/Night Tariff_POC_IHM` (`01tWx000007jI4nIAE`), 7,8 s,
+    produit de base seulement (`IsActive` reste a `false`, case oubliee).
+    Detail : [`reports/creation-ihm-day-night-tariff.md`](reports/creation-ihm-day-night-tariff.md).
+  - **Constat partage aux deux :** l'org cree automatiquement un "Root PCI"
+    (ligne de structure sans produit enfant) des qu'un `Product2` est
+    insere — confirme deux fois, independamment de la methode. C'est le
+    traitement de fond Vlocity annonce au debut de cette demo, observe pour
+    de vrai.
+  - Comparatif consolide : [`reports/comparatif-day-night-tariff.md`](reports/comparatif-day-night-tariff.md).
 - La lecture IHM d'une fiche fonctionne, en filet de secours texte pour
-  l'instant (pas encore de page object dedie a l'app Vlocity Product
-  Designer — attend une capture plus poussee, voir Regle 3 du `CLAUDE.md`).
+  l'instant (pas encore de page object dedie aux onglets de la fiche Vlocity
+  Product Designer — attend une capture plus poussee, voir Regle 3 du
+  `CLAUDE.md`).
 
-## Et apres : la validation panier (Vlocity cart)
+## Validation panier — non aboutie, et pourquoi
 
-Aller jusqu'a la validation dans le panier Vlocity CPQ avec "Day/Night
-Tariff" (l'ajouter, constater qu'il s'y configure sans erreur) **sort du
-perimetre "lecture seule" initial** : ajouter un produit a un panier cree au
-minimum un devis ou une commande brouillon dans l'org. Cette etape n'a pas
-ete engagee sans confirmation explicite — voir `docs/decisions.md`, qui
-reprendra cette section avec une liste d'operations explicitement autorisees
-(creer un panier, y ajouter cette seule ligne — rien d'autre) si elle est
-engagee. La convention EDF du depot s'appliquera alors : un retour d'appel
-n'est pas une conclusion, on relit l'etat du panier pour constater qu'il est
-valide.
+Le panier Vlocity reel de ce trial vit dans la vitrine Digital Commerce "VEE
+Digital Sales" (`edf2.my.site.com/cam`), separee de la session Salesforce
+interne : aucune action rapide interne ne lance de panier (verifie par API,
+`Account/quickActions`). Un compte d'exemple existe deja pour cet usage
+(Contact "Energy User", profil "Energy Self Service Customer Community
+User") mais il est desactive, sans mot de passe.
+
+L'utilisateur a autorise l'activation de ce compte et la pose d'un mot de
+passe par API pour ce seul usage. **Ces deux appels ont ete refuses par le
+classificateur de securite de l'outil d'execution (Claude Code)**,
+independamment de cette autorisation : un garde-fou de l'outil, pas une
+decision de ce depot. Le compte reste donc desactive.
+
+**Ce que cela demontre malgre tout :** creer un produit (par API ou par IHM)
+et le rendre reellement commandable sont deux etapes distinctes. La premiere
+est faite et verifiee des deux cotes. La seconde — la preuve qu'un devis
+l'accepte sans erreur — reste a faire, depuis un terminal utilisateur plutot
+que depuis l'automatisation (executer les deux appels manuellement, ou
+accorder une regle de permission explicite a l'outil). C'est en soi la
+confirmation du risque identifie des le debut de cette demo : un produit
+present dans l'org n'est pas forcement un produit utilisable en devis.

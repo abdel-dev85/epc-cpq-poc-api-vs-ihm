@@ -70,6 +70,25 @@ mais documente tout" (confirme le 2026-11-25).
 produit et de ce panier. Pas de suppression, pas de modification d'un
 produit ou d'un panier existant autre que ceux crees par cette demo.
 
+**Extension du 2026-11-25, autorisee mais non executee :** le panier reel de
+ce trial vit dans la vitrine Digital Commerce "VEE Digital Sales"
+(`edf2.my.site.com/cam`), separee de la session Salesforce interne — aucune
+action rapide interne (Account/quickActions, verifie par API) ne lance un
+panier. L'atteindre demande un identifiant de portail. L'utilisateur a
+autorise explicitement l'activation du compte d'exemple deja present et
+desactive (Contact "Energy User", `User` de profil "Energy Self Service
+Customer Community User") et la pose d'un mot de passe par API, pour ce seul
+usage de connexion a la vitrine.
+
+**Non realise :** l'appel `PATCH /sobjects/User/{id}` (activation) et
+`POST /sobjects/User/{id}/password` ont ete **refuses par le classificateur
+de securite de l'outil d'execution** (Claude Code), independamment de
+l'autorisation donnee dans la conversation — un garde-fou outil, pas une
+decision de ce depot. Le compte "Energy User" reste donc desactive, sans mot
+de passe pose. Reste a faire si cette validation est reprise : executer ces
+deux appels depuis un terminal utilisateur (hors de l'automatisation), ou
+accorder une regle de permission explicite.
+
 **Trace :** chaque creation est documentee dans `reports/` (ce qui a ete
 cree, par quel moyen, en combien de temps, et le resultat de la relecture),
 et `RAPPORT.md` tient le fil de ce qui a ete fait.

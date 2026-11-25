@@ -1,11 +1,12 @@
 'use strict';
 
 /**
- * Serveur MCP (stdio) de decouverte EPC/CPQ par API Salesforce.
+ * Serveur MCP (stdio) de decouverte et de creation EPC/CPQ par API Salesforce.
  *
- * Lecture seule, strictement : aucun outil n'ecrit dans l'org (voir
- * docs/decisions.md a la racine du depot). Rien sur stdout en dehors du
- * protocole MCP ; le journal de debug va dans un fichier, sous EPC_DEBUG=1.
+ * Mutation cadree au perimetre ecrit dans docs/decisions.md a la racine du
+ * depot (creer une variante de produit suffixee, rien d'autre) : voir
+ * create-variant.js. Rien sur stdout en dehors du protocole MCP ; le journal
+ * de debug va dans un fichier, sous EPC_DEBUG=1.
  */
 
 const fs = require('fs');
@@ -168,8 +169,8 @@ server.registerTool(
     title: 'Executer une requete SOQL (lecture seule)',
     description:
       'Execute une requete SOQL libre et pagine les resultats jusqu\'a maxRecords. '
-      + 'SELECT uniquement : ce depot est en lecture seule (voir docs/decisions.md), '
-      + 'toute autre requete est refusee avant meme d\'atteindre l\'org.',
+      + 'SELECT uniquement, quel que soit le perimetre de mutation autorise par ailleurs '
+      + '(docs/decisions.md) : toute autre requete est refusee avant meme d\'atteindre l\'org.',
     inputSchema: z.strictObject({
       soql: z.string().describe('Requete SOQL, doit commencer par SELECT'),
       maxRecords: z.number().int().min(1).max(2000).optional().describe('Defaut 500'),
@@ -178,11 +179,36 @@ server.registerTool(
   guarded('epc_api_run_soql', async ({ soql, maxRecords = 500 }) => {
     if (!/^\s*select\b/i.test(soql)) {
       return {
-        content: [{ type: 'text', text: 'Requete refusee : seules les requetes SELECT sont autorisees (serveur en lecture seule).' }],
+        content: [{ type: 'text', text: 'Requete refusee : cet outil n\'execute que des SELECT.' }],
         isError: true,
       };
     }
     const result = await query(soql, { maxRecords });
+    return textResult(result);
+  })
+);
+
+server.registerTool(
+  'epc_api_create_product_variant',
+  {
+    title: 'Creer une variante de produit (mutation cadree)',
+    description:
+      'Cree une variante d\'un produit source : un nouveau Product2 suffixe, avec la meme '
+      + 'categorie, les memes attributs, la meme tarification et les memes composants de bundle '
+      + '(objet model Vlocity CMT constate sur ce trial). Chaque ecriture est tracee ; l\'etat '
+      + 'obtenu est relu par SOQL avant de rendre le resultat (un retour d\'appel seul n\'est pas '
+      + 'une conclusion). Perimetre autorise par docs/decisions.md : ne pas appeler sur un produit '
+      + 'hors de ce perimetre sans mettre ce document a jour d\'abord.',
+    inputSchema: z.strictObject({
+      sourceIdOrName: z.string().describe('Id ou nom exact/univoque du produit source'),
+      suffix: z.string().optional().describe('Defaut "_POC_API"'),
+    }),
+  },
+  guarded('epc_api_create_product_variant', async ({ sourceIdOrName, suffix }) => {
+    const { createApiVariant } = require('./create-variant');
+    const start = Date.now();
+    const result = await createApiVariant(sourceIdOrName, suffix);
+    result.durationMs = Date.now() - start;
     return textResult(result);
   })
 );

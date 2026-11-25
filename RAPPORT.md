@@ -100,24 +100,40 @@ RULES / FULFILLMENT. C'est precisement le genre d'information que la lecture
 IHM donne et que l'API ne rend pas sous cette forme — la comparaison que
 cette demo est censee faire.
 
+Autre correction, posterieure a la premiere connexion reussie : les objets
+standard sondes au depart (`ProductAttributeDefinition`,
+`ProductRelatedComponent`...) existent mais sont **vides pour tous les
+produits** de ce trial. Un classement du catalogue (44 produits actifs) par
+objets `vlocity_cmt__*` a confirme que **le modele reellement peuple est
+Vlocity CMT**, pas l'objet model standard suppose au depart — le trial a 1040
+objets `vlocity_cmt__*` installes. Le blueprint sonde desormais les deux en
+parallele.
+
 ## Statut courant
 
 - Les deux serveurs MCP sont connectes et valides contre le trial
   (`npm run ping` rend `status: connected` dans les deux).
-- Le blueprint API a ete valide sur un vrai produit (`Solar Panel Starter
-  kit`) : fiche, tarification lues, attributs/categories/composants absents
-  pour ce produit precis (pas une erreur — ce produit n'en a pas).
+- **Produit retenu pour la demo : "Day/Night Tariff"**, choisi par classement
+  automatique du catalogue sur la richesse de donnees reellement peuplee —
+  c'est le produit qui couvre le plus de dimensions a la fois (categorie, 3
+  attributs types, tarification, bundle de 3 composants).
+- **Simulation executee de bout en bout sur ce produit :**
+  - decouverte API : 5,5 s ([`reports/decouverte-api-day-night-tariff.md`](reports/decouverte-api-day-night-tariff.md))
+  - decouverte IHM : 78,5 s, re-authentification incluse ([`reports/decouverte-ihm-day-night-tariff.md`](reports/decouverte-ihm-day-night-tariff.md))
+  - comparatif : [`reports/comparatif-day-night-tariff.md`](reports/comparatif-day-night-tariff.md)
 - La lecture IHM d'une fiche fonctionne, en filet de secours texte pour
   l'instant (pas encore de page object dedie a l'app Vlocity Product
   Designer — attend une capture plus poussee, voir Regle 3 du `CLAUDE.md`).
 
 ## Et apres : la validation panier (Vlocity cart)
 
-Aller jusqu'a la validation dans le panier Vlocity CPQ (ajouter le produit,
-constater qu'il s'y configure sans erreur) **sort du perimetre "lecture
-seule" initial** : ajouter un produit a un panier cree au minimum un devis ou
-une commande brouillon dans l'org. Si cette etape est engagee, elle reprend
-`docs/decisions.md` avec une liste d'operations explicitement autorisees
-(creer un panier, y ajouter une ligne — rien d'autre), et applique la
-convention EDF du depot : un retour d'appel n'est pas une conclusion, on
-relit l'etat du panier pour constater qu'il est valide.
+Aller jusqu'a la validation dans le panier Vlocity CPQ avec "Day/Night
+Tariff" (l'ajouter, constater qu'il s'y configure sans erreur) **sort du
+perimetre "lecture seule" initial** : ajouter un produit a un panier cree au
+minimum un devis ou une commande brouillon dans l'org. Cette etape n'a pas
+ete engagee sans confirmation explicite — voir `docs/decisions.md`, qui
+reprendra cette section avec une liste d'operations explicitement autorisees
+(creer un panier, y ajouter cette seule ligne — rien d'autre) si elle est
+engagee. La convention EDF du depot s'appliquera alors : un retour d'appel
+n'est pas une conclusion, on relit l'etat du panier pour constater qu'il est
+valide.

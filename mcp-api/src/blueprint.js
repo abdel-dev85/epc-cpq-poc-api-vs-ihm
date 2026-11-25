@@ -18,45 +18,85 @@ function escapeSoql(value) {
   return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
-/** Sondes de sections liees au produit : chacune se desactive si l'objet ou le champ cle n'existe pas. */
+/**
+ * Sondes de sections liees au produit : chacune se desactive si l'objet ou le
+ * champ de jointure (`whereField`) n'existe pas. Les autres champs
+ * (`fields`) sont de simples candidats — un champ absent sur cet org/edition
+ * (ex. multi-devise non active) est retire et la requete retentee plutot que
+ * d'abandonner toute la section : voir `queryWithFieldFallback`.
+ */
 const RELATED_PROBES = [
   {
     section: 'categories',
     object: 'ProductCategoryProduct',
-    requiredField: 'ProductId',
-    soql: (id) => `SELECT ProductCategoryId, ProductCategory.Name, IsPrimaryCategory
-                    FROM ProductCategoryProduct WHERE ProductId = '${id}'`,
+    whereField: 'ProductId',
+    fields: ['ProductCategoryId', 'ProductCategory.Name', 'IsPrimaryCategory'],
   },
   {
     section: 'attributs',
     object: 'ProductAttributeDefinition',
-    requiredField: 'Product2Id',
-    soql: (id) => `SELECT Id, AttributeDefinition.Name, AttributeDefinition.DataType,
-                           Sequence, IsRequired, IsReadOnly, IsHidden
-                    FROM ProductAttributeDefinition WHERE Product2Id = '${id}' ORDER BY Sequence`,
+    whereField: 'Product2Id',
+    fields: ['Id', 'AttributeDefinition.Name', 'AttributeDefinition.DataType', 'Sequence', 'IsRequired', 'IsReadOnly', 'IsHidden'],
+    orderBy: 'Sequence',
   },
   {
     section: 'modelesDeVente',
     object: 'ProductSellingModelOption',
-    requiredField: 'Product2Id',
-    soql: (id) => `SELECT ProductSellingModelId, ProductSellingModel.Name, ProductSellingModel.SellingModelType
-                    FROM ProductSellingModelOption WHERE Product2Id = '${id}'`,
+    whereField: 'Product2Id',
+    fields: ['ProductSellingModelId', 'ProductSellingModel.Name', 'ProductSellingModel.SellingModelType'],
   },
   {
     section: 'tarification',
     object: 'PricebookEntry',
-    requiredField: 'Product2Id',
-    soql: (id) => `SELECT Pricebook2.Name, UnitPrice, IsActive, CurrencyIsoCode
-                    FROM PricebookEntry WHERE Product2Id = '${id}'`,
+    whereField: 'Product2Id',
+    fields: ['Pricebook2.Name', 'UnitPrice', 'IsActive', 'CurrencyIsoCode'],
   },
   {
     section: 'composants',
     object: 'ProductRelatedComponent',
-    requiredField: 'ParentProductId',
-    soql: (id) => `SELECT ChildProductId, ChildProduct.Name, ProductComponentGroupId, MinQuantity, MaxQuantity
-                    FROM ProductRelatedComponent WHERE ParentProductId = '${id}'`,
+    whereField: 'ParentProductId',
+    fields: ['ChildProductId', 'ChildProduct.Name', 'ProductComponentGroupId', 'MinQuantity', 'MaxQuantity'],
   },
 ];
+
+/** Nom de champ invalide, tel que Salesforce le nomme dans son message d'erreur SOQL. */
+function invalidFieldFrom(message) {
+  const match = /No such column '([^']+)' on entity/.exec(message);
+  return match ? match[1] : null;
+}
+
+/**
+ * Execute une requete en retirant, un a la fois, les champs que l'org rend
+ * invalides (INVALID_FIELD), jusqu'a ce qu'elle passe ou qu'il n'en reste
+ * plus. Rend aussi la liste des champs abandonnes, pour que l'appelant le
+ * documente plutot que de le taire.
+ */
+async function queryWithFieldFallback(object, fields, whereClause, orderBy) {
+  let remaining = [...fields];
+  const dropped = [];
+
+  while (remaining.length) {
+    const select = `SELECT ${remaining.join(', ')} FROM ${object} WHERE ${whereClause}`
+      + (orderBy ? ` ORDER BY ${orderBy}` : '');
+    try {
+      const result = await query(select);
+      return { records: result.records, dropped };
+    } catch (err) {
+      const bad = invalidFieldFrom(err.message);
+      // Le champ fautif peut porter un prefixe de relation (Pricebook2.Name) :
+      // on le compare a la fois tel quel et sur son dernier segment.
+      const index = bad && remaining.findIndex(f => f === bad || f.endsWith(`.${bad}`));
+      if (bad && index !== undefined && index >= 0) {
+        dropped.push(remaining[index]);
+        remaining.splice(index, 1);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw new Error(`Tous les champs candidats de ${object} sont invalides sur cet org.`);
+}
 
 async function resolveProduct(productIdOrName) {
   if (ID_PATTERN.test(productIdOrName)) {
@@ -107,18 +147,26 @@ async function buildProductBlueprint(productIdOrName) {
       blueprint.omis.push({ section: probe.section, objet: probe.object, raison: 'objet absent de cet org' });
       continue;
     }
-    const hasField = describe.fields.some(f => f.name.toLowerCase() === probe.requiredField.toLowerCase());
+    const hasField = describe.fields.some(f => f.name.toLowerCase() === probe.whereField.toLowerCase());
     if (!hasField) {
       blueprint.omis.push({
         section: probe.section, objet: probe.object,
-        raison: `champ ${probe.requiredField} absent de ${probe.object} sur cet org`,
+        raison: `champ ${probe.whereField} absent de ${probe.object} sur cet org`,
       });
       continue;
     }
 
     try {
-      const result = await query(probe.soql(product.Id));
-      blueprint.sections[probe.section] = { objet: probe.object, enregistrements: result.records };
+      const { records, dropped } = await queryWithFieldFallback(
+        probe.object, probe.fields, `${probe.whereField} = '${product.Id}'`, probe.orderBy
+      );
+      blueprint.sections[probe.section] = { objet: probe.object, enregistrements: records };
+      if (dropped.length) {
+        blueprint.omis.push({
+          section: probe.section, objet: probe.object,
+          raison: `champ(s) ignore(s), absents de cet org/edition : ${dropped.join(', ')}`,
+        });
+      }
     } catch (err) {
       blueprint.omis.push({ section: probe.section, objet: probe.object, raison: err.message });
     }
